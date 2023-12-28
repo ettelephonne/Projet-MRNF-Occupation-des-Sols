@@ -1,0 +1,50 @@
+var polygons = [geometry];
+
+// Définir les périodes de dates
+var dateRanges = [
+  ['2018-06-01', '2018-09-01'],
+  ['2019-06-01', '2019-09-01'],
+  ['2020-06-01', '2020-09-01'],
+  ['2021-06-01', '2021-09-30'],
+  ['2022-06-01', '2022-09-01'],
+];
+
+// Pour chaque période de dates
+for (var d = 0; d < dateRanges.length; d++) {
+
+  // Créer une collection d'images pour la période de dates actuelle
+  var collection = ee.ImageCollection("COPERNICUS/S2")
+      .filterDate(dateRanges[d][0], dateRanges[d][1])
+      .filterBounds(geometry)
+      .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 1);
+
+  // Pour chaque polygone
+  for (var i = 0; i < polygons.length; i++) {
+
+    // Filtrer la collection par le polygone
+    var filtered = collection.filterBounds(polygons[i]);
+
+    // Prendre toutes les images et les mosaïquer
+    var mosaic = filtered.mosaic().select(['B4', 'B3', 'B2', 'B8']);
+
+    // Ajouter l'image à la carte
+   Map.addLayer(mosaic, {bands: ['B4', 'B3', 'B2'], max: 2500}, 'Mosaic ' + (2018+d));  // étiquette basée sur l'année
+    // Exporter l'image
+    Export.image.toDrive({
+      image: mosaic,
+      description: 'montreal_2020' + (d+1) + '_' + (i+1),
+      folder: 'montreal',
+      fileNamePrefix: 'montreal_2020' + (d+1) + '_' + (i+1),
+      region: polygons[i],
+      scale: 10,
+      maxPixels: 1e12,
+      shardSize: 512,
+      fileDimensions: 512*100/4,
+      crs: 'EPSG:4141',
+      fileFormat: 'GeoTIFF',
+    });
+  }
+}
+
+// Centrer la carte sur la géométrie
+Map.centerObject(geometry, 8);
