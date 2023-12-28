@@ -1,9 +1,7 @@
 import os
-
 import numpy as np
 from joblib import Parallel, delayed
 from fonctions import *
-
 
 def master_function(repet_all):
     print('Simulation number', repet_all)
@@ -34,12 +32,6 @@ def master_function(repet_all):
                 break
             raster = gdal.Open(os.path.join(in_path_textures, folder, file))
             texture = np.moveaxis(raster.ReadAsArray(), 0, 2)
-            if np.max(texture) < 1:
-                print(np.unique(texture), 'ALARME texture vide')
-            non_nul = texture[:, :, :3] > 0
-            if np.min(texture[:, :, :3][non_nul]) < 10:
-                print(np.unique(texture[:, :, :3])[:5])
-                print('NON ############################## < 10', np.min(texture[:, :, :3][non_nul]), str(file))
             dico_textures[folder].append(texture)
     dico_formes = {}
     folders = os.listdir(in_path_shapes)
