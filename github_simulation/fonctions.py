@@ -326,10 +326,7 @@ def random_crop(matrix, crop_size):
     return matrix[y:y + crop_size[0], x:x + crop_size[1]]
 
 def incrustation(img_sim, mask_sim, mask_prop, image, value, place, NDVI=False):
-    # Pre-flight check for image values.
-    if np.max(image) < 1:
-        print('ALARNE dès le début')
-    
+
     # Select a threshold randomly for deciding on mixing operations and whether to mix the images.
     rand_seuil = np.random.choice([4, 6])/10
     mix = np.random.choice([True, False], p=[0.8, 0.2])
